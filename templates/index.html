@@ -2,7 +2,47 @@
 <div class="toolbar"><form method="get" class="filters"><label>Bo‘lim<select name="department" onchange="this.form.submit()">{% for d in departments %}<option value="{{ d.id }}" {% if d.id==dept.id %}selected{% endif %}>{{ d.name }}</option>{% endfor %}</select></label><label>Hisobot yili<select name="year" onchange="this.form.submit()">{% for y in range(2025,2031) %}<option value="{{ y }}" {% if y==year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></label></form>{% if user.role=='admin' %}<div class="admin-links"><a href="{{ url_for('departments') }}">Bo‘limlarni boshqarish</a><a href="{{ url_for('users') }}">Foydalanuvchilar</a></div>{% endif %}</div>
 <div class="kpis"><article class="kpi"><span>{{ year }}-yil tushumi</span><strong>{{ '{:,.0f}'.format(total_revenue).replace(',', ' ') }} so‘m</strong><small>Tanlangan yil bo‘yicha</small></article><article class="kpi"><span>{{ year }}-yil qiyoslov</span><strong>{{ '{:,.0f}'.format(total_q).replace(',', ' ') }} ta</strong><small>Jami qiyoslovlar</small></article><article class="kpi"><span>Xulosa berish rejasi</span><strong>{{ total_plan }} ta</strong><small>Yil davomida</small></article><article class="kpi"><span>Reja bajarilishi</span><strong>{% if completion is not none %}{{ '%.1f'|format(completion) }}%{% else %}—{% endif %}</strong><small>{{ total_actual }} ta amalda bajarilgan</small></article></div>
 <form method="post" action="{{ url_for('save') }}"><input type="hidden" name="department_id" value="{{ dept.id }}"><input type="hidden" name="year" value="{{ year }}"><div class="section-head"><div><h2>Oylik ma’lumotlar</h2><p class="muted">Qiymatlarni kiriting va “Saqlash” tugmasini bosing.</p></div><button class="primary">Ma’lumotlarni saqlash</button></div><div class="table-wrap"><table><thead><tr><th>Oy</th><th>{{ year }} tushum (so‘m)</th><th>{{ year }} qiyoslov (ta)</th><th>Reja (ta)</th><th>Amalda (ta)</th><th>Bajarilish</th></tr></thead><tbody>{% for r in rows %}<tr><td class="month">{{ r.name }}</td><td><input class="num" name="revenue_{{ r.month }}" type="number" min="0" step="1" value="{{ r.revenue|int }}"></td><td><input class="num" name="qiyoslov_{{ r.month }}" type="number" min="0" step="1" value="{{ r.qiyoslov }}"></td><td><input class="num" name="conclusion_plan_{{ r.month }}" type="number" min="0" step="1" value="{{ r.plan }}"></td><td><input class="num" name="conclusion_actual_{{ r.month }}" type="number" min="0" step="1" value="{{ r.actual }}"></td><td>{% if r.plan %}<span class="pill {% if r.actual>=r.plan %}good{% else %}warn{% endif %}">{{ '%.1f'|format(r.completion) }}%</span>{% else %}<span class="muted">—</span>{% endif %}</td></tr>{% endfor %}</tbody></table></div></form>
-<section class="panel"><div class="section-head"><div><h2>Tushum taqqoslanishi</h2><p class="muted">2025 va 2026-yil bo‘yicha, so‘m</p></div></div><div class="legend"><span><i class="dot old"></i>2025</span><span><i class="dot new"></i>2026</span></div><div class="label">{% for r in rows %}<div class="chart-row"><span class="chart-label">{{ r.name[:3] }}</span><div class="bars"><div class="bar old" style="width:{{ (r.rev25/maxval.value*100) if maxval.value else 0 }}%" title="2025: {{ r.rev25|int }}"></div><div class="bar new" style="width:{{ (r.rev26/maxval*100) if maxval else 0 }}%" title="2026: {{ r.rev26|int }}"></div></div><span class="growth {% if r.rev_growth is not none and r.rev_growth>=0 %}positive{% elif r.rev_growth is not none %}negative{% endif %}">{% if r.rev_growth is not none %}{{ '%+.1f'|format(r.rev_growth) }}%{% else %}—{% endif %}</span></div>{% endfor %}</div></section>
+
+<section class="panel">
+  <div class="section-head">
+    <div>
+      <h2>Tushum taqqoslanishi</h2>
+      <p class="muted">2025 va 2026-yil bo‘yicha, so‘m</p>
+    </div>
+  </div>
+  <div class="legend">
+    <span><i class="dot old"></i>2025</span>
+    <span><i class="dot new"></i>2026</span>
+  </div>
+  {% set maxval = namespace(value=0) %}
+  {% for x in rows %}
+    {% if x.rev25 > maxval.value %}
+      {% set maxval.value = x.rev25 %}
+    {% endif %}
+    {% if x.rev26 > maxval.value %}
+      {% set maxval.value = x.rev26 %}
+    {% endif %}
+  {% endfor %}
+  <div class="chart">
+    {% for r in rows %}
+      <div class="chart-row">
+        <span class="chart-label">{{ r.name[:3] }}</span>
+        <div class="bars">
+          <div class="bar old" style="width:{{ (r.rev25/maxval.value*100) if maxval.value else 0 }}%" title="2025: {{ r.rev25|int }}"></div>
+          <div class="bar new" style="width:{{ (r.rev26/maxval.value*100) if maxval.value else 0 }}%" title="2026: {{ r.rev26|int }}"></div>
+        </div>
+        <span class="growth {% if r.rev_growth is not none and r.rev_growth>=0 %}positive{% elif r.rev_growth is not none %}negative{% endif %}">
+          {% if r.rev_growth is not none %}
+            {{ '%+.1f'|format(r.rev_growth) }}%
+          {% else %}
+            —
+          {% endif %}
+        </span>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
 <section class="panel"><div class="section-head"><div><h2>Qiyoslov soni taqqoslanishi</h2><p class="muted">2025 va 2026-yil bo‘yicha, dona</p></div></div><div class="legend"><span><i class="dot old"></i>2025</span><span><i class="dot new"></i>2026</span></div><div class="label">  {% if x.rev25 > maxval.value %}
 {% set maxq.value = namespace(value=0) %}{% for x in rows %}{% if x.q25 > maxq.value %}{% set maxq.value = x.q25 %}{% endif %}{% if x.q26 > maxq.value %}{% set maxq.value = x.q26 %}{% endif %}{% endfor %}<div class="chart-row"><span class="chart-label">{{ r.name[:3] }}</span><div class="bars"><div class="bar old" style="width:{{ (r.q25/maxq.value*100) if maxq.value else 0 }}%" title="2025: {{ r.q25 }}"></div><div class="bar new" style="width:{{ (r.q26/maxq.value*100) if maxq.value else 0 }}%" title="2026: {{ r.q26 }}"></div></div><span class="growth {% if r.q_growth is not none and r.q_growth>=0 %}positive{% elif r.q_growth is not none %}negative{% endif %}">{% if r.q_growth is not none %}{{ '%+.1f'|format(r.q_growth) }}%{% else %}—{% endif %}</span></div>{% endfor %}</div></section>
 <section class="panel"><h2>Avtomatik xulosa</h2><p>{{ year }}-yilda {{ dept.name }} bo‘yicha tushum <strong>{{ '{:,.0f}'.format(total_revenue).replace(',', ' ') }} so‘m</strong>, qiyoslovlar soni <strong>{{ total_q }} ta</strong>ni tashkil etdi. Domlarga xulosa berish bo‘yicha reja <strong>{{ total_plan }} ta</strong>, amaldagi natija <strong>{{ total_actual }} ta</strong>. {% if completion is not none %}Reja bajarilishi {{ '%.1f'|format(completion) }}%.{% else %}Reja kiritilgach, bajarilish foizi hisoblanadi.{% endif %}</p></section>
