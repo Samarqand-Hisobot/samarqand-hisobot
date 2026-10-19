@@ -1,16 +1,22 @@
-## Hi there 👋
+# Samarqand bo‘limi hisobot web-dasturi
 
-<!--
-**Samarqand-Hisobot/samarqand-hisobot** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+## Imkoniyatlar
+- Login/parol orqali kirish; parollar xavfsiz hash ko‘rinishida saqlanadi.
+- Administrator bo‘lim va foydalanuvchilarni qo‘shadi.
+- Oylik ma’lumotlar: tushum, qiyoslov, reja va amaldagi xulosa.
+- 2025 va 2026-yil ko‘rsatkichlari hamda foizlar.
+- PDF va PowerPoint eksporti.
+- Standart holatda SQLite ma’lumotlar bazasi; hostingda PostgreSQL `DATABASE_URL` orqali sozlanishi mumkin.
 
-Here are some ideas to get you started:
+## Mahalliy kompyuterda ishga tushirish
+1. Python 3.11 yoki undan yangi versiyani o‘rnating.
+2. Terminalda loyiha papkasiga kiring.
+3. Virtual muhit yarating: `python -m venv .venv`
+4. Faollashtiring (Windows): `.venv\\Scripts\\activate` (macOS/Linux: `source .venv/bin/activate`).
+5. Kutubxonalarni o‘rnating: `pip install -r requirements.txt`
+6. `.env.example` dagi qiymatlarni muhit o‘zgaruvchilari sifatida kiriting. `ADMIN_USERNAME` va `ADMIN_PASSWORD` ni albatta o‘zingizga moslab belgilang.
+7. Ishga tushiring: `python app.py`
+8. Brauzerda `http://127.0.0.1:5000` manzilini oching.
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+## Eslatma
+Bu manba kodi loyihasi; u hali internetga joylashtirilmagan. Ommaviy internetga chiqarishdan oldin kuchli `SECRET_KEY`, kuchli administrator paroli, HTTPS va doimiy ma’lumotlar bazasi sozlanishi kerak. `ADMIN_PASSWORD` ni kod ichiga yozmang.
