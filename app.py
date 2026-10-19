@@ -215,7 +215,7 @@ def export_pptx():
 with app.app_context():
     db.create_all()
     # Bootstrap an administrator only when environment credentials are supplied.
-    admin_user=os.environ.get('ADMIN_USERNAME'); admin_password=os.environ.get('ADMIN_PASSWORD')
+    admin_user=os.environ.get('ADMIN_123'); admin_password=os.environ.get('ADMIN_PASSWORD')
     if admin_user and admin_password and not User.query.filter_by(username=admin_user).first():
         db.session.add(User(username=admin_user,password_hash=generate_password_hash(admin_password),role='admin'))
         db.session.commit()
